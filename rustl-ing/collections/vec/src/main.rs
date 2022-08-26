@@ -43,4 +43,18 @@ fn main() {
             *i += 50;
         }
     }
+
+    {
+        enum SpreadSheetCell {
+            Int(i32),
+            Float(f64),
+            Text(String),
+        }
+
+        let row = vec![
+            SpreadSheetCell::Int(3),
+            SpreadSheetCell::Float(3.1415926),
+            SpreadSheetCell::Text(String::from("Hello")),
+        ];
+    }
 }
