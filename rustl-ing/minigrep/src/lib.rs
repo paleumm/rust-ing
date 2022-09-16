@@ -7,14 +7,20 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        }
-        let query = args[1].clone();
-        let file_path = args[2].clone();
+    pub fn build(mut args: env::Args) -> Result<Config, &'static str> {
+        args.next(); // ignored : path to program
 
-        let ignore_case = env::var("IGNORE_CASE").is_ok();
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Did not get query string"),
+        };
+
+        let file_path = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Did not get the file name"),
+        };
+
+        let ignore_case = env::var("IGNORE_CASE").is_err();
 
         Ok(Config {
             query,
@@ -36,16 +42,10 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
 }
 
 pub fn search_case_insentitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let query = query.to_lowercase();
-    let mut result = Vec::new();
-
-    for line in contents.lines() {
-        if line.to_lowercase().contains(&query) {
-            result.push(line);
-        }
-    }
-
-    result
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
